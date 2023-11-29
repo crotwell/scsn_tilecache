@@ -1,0 +1,16 @@
+[Unit]
+Description=Dead simple map tile cache
+After=multi-user.target
+Requires=apache2.service
+
+[Service]
+User=dasadmin
+Group=dasadmin
+WorkingDirectory=/home/dasadmin
+Restart=always
+RestartSec=10
+Type=idle
+ExecStart=/home/dasadmin/.local/bin/scsntilecache -c /home/dasadmin/tilecache.toml 
+
+[Install]
+WantedBy=default.target
