@@ -25,8 +25,8 @@ class TileCacheWebService(object):
             print(f"dispatch for 4")
             cherrypy.request.params['mapname'] = vpath.pop(0)
             cherrypy.request.params['zoom'] = vpath.pop(0)
-            cherrypy.request.params['xtile'] = vpath.pop(0)
             cherrypy.request.params['ytile'] = vpath.pop(0)
+            cherrypy.request.params['xtile'] = vpath.pop(0)
             return self.tilecache
 
         return vpath
@@ -67,10 +67,11 @@ class TileCache(object):
     def __init__(self, cachedir, nameToUrl):
         self.cachedir = cachedir
         self.nameToUrl = nameToUrl
-    def loadTile(self, baseUrl, mapname, zoom, xtile, ytile):
-        print(f"### Load Remote: {mapname} {zoom}/{xtile}/{ytile}")
-        r = requests.get(f'{baseUrl}/{zoom}/{xtile}/{ytile}')
-        f = pathlib.Path(f"./{self.cachedir}/{mapname}/{zoom}/{xtile}/{ytile}")
+    def loadTile(self, baseUrl, mapname, zoom, ytile, xtile):
+        print(f"### Load Remote: {mapname} {zoom}/{ytile}/{xtile}")
+        r = requests.get(f'{baseUrl}/{zoom}/{ytile}/{xtile}')
+        print(f"   {r.url}")
+        f = pathlib.Path(f"./{self.cachedir}/{mapname}/{zoom}/{ytile}/{xtile}")
         if r.status_code == requests.codes.ok:
             f.parent.mkdir(parents=True, exist_ok=True)
             tileBytes = r.content
@@ -79,13 +80,16 @@ class TileCache(object):
                 cachefile.write(tileBytes)
             cherrypy.response.headers['Content-Type'] = r.headers['Content-Type']
             return tileBytes
+        else:
+            print("response not ok")
+            print(r.text)
     def getBaseUrl(self, mapname):
         if mapname in self.nameToUrl:
             return self.nameToUrl['mapname']
     @cherrypy.expose
-    def index(self, mapname, zoom, xtile, ytile):
+    def index(self, mapname, zoom, ytile, xtile):
         print(f"tilecache: {mapname}")
-        f = pathlib.Path(f"./{self.cachedir}/{mapname}/{zoom}/{xtile}/{ytile}")
+        f = pathlib.Path(f"{self.cachedir}/{mapname}/{zoom}/{ytile}/{xtile}")
         if f.exists():
             print(f"serve existing file: {f}")
             filename = f"{f.absolute()}"
@@ -94,15 +98,12 @@ class TileCache(object):
         elif mapname in self.nameToUrl:
             baseurl = self.nameToUrl[mapname]
             print(f"load from urlmap: {baseurl}")
-            return self.loadTile(baseurl, mapname, zoom, xtile, ytile)
-        elif mapname == "USGSTopo":
-            baseurl= f'https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile'
-            return self.loadTile(baseurl, mapname, zoom, xtile, ytile)
+            return self.loadTile(baseurl, mapname, zoom, ytile, xtile)
         else:
             return f"""
     <html>
     <body>
-    <p>Need to get {mapname}/{zoom}/{xtile}/{ytile}</p>
+    <p>Need to get {mapname}/{zoom}/{ytile}/{xtile}</p>
     <p>but unknown map name: {mapname}</p>
     </body>
     </html>
