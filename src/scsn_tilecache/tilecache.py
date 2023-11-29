@@ -9,10 +9,14 @@ class TileCacheWebService(object):
 
     def __init__(self, conf={}):
         self.conf = self.configure_defaults(conf)
-        self.tilecache = TileCache(self.conf['tilecache']['cachedir'])
+        self.tilecache = TileCache(self.conf['tilecache']['cachedir'],
+                                   self.conf['tilecache']['nameToUrl'])
 
     def _cp_dispatch(self, vpath):
         print(f"_cp_dispatch: {len(vpath)}")
+        if len(vpath) == 0:
+            return self.knownMaps()
+
         if len(vpath) == 1:
             cherrypy.request.params['mapname'] = vpath.pop()
             return self
@@ -28,8 +32,20 @@ class TileCacheWebService(object):
         return vpath
 
     @cherrypy.expose
-    def index(self, mapname):
-        return 'About %s...' % mapname
+    def index(self, mapname=None):
+        if mapname is not None:
+            return 'About %s...' % mapname
+        else:
+            return self.knownMaps()
+    def knownMaps(self):
+        html = f"""<html>
+        <body>
+        <ul>
+        """
+        for mapname, baseurl in self.conf['tilecache']['nameToUrl'].items():
+            html += f"<li><a href=\"{mapname}\">{mapname}</a> <a href=\"{baseurl}\">{baseurl}</a></li>\n"
+        html += "</ul></body></html>"
+        return html
 
 
     def configure_defaults(self, conf):
@@ -48,8 +64,9 @@ class TileCacheWebService(object):
         return out
 
 class TileCache(object):
-    def __init__(self, cachedir):
+    def __init__(self, cachedir, nameToUrl):
         self.cachedir = cachedir
+        self.nameToUrl = nameToUrl
     def loadTile(self, baseUrl, mapname, zoom, xtile, ytile):
         print(f"### Load Remote: {mapname} {zoom}/{xtile}/{ytile}")
         r = requests.get(f'{baseUrl}/{zoom}/{xtile}/{ytile}')
@@ -57,14 +74,14 @@ class TileCache(object):
         if r.status_code == requests.codes.ok:
             f.parent.mkdir(parents=True, exist_ok=True)
             tileBytes = r.content
-            print(f"bytes in tile: {len(tileBytes)}")
+            print(f"bytes in tile: {len(tileBytes)} from {r.url}")
             with open(f, "wb") as cachefile:
                 cachefile.write(tileBytes)
             cherrypy.response.headers['Content-Type'] = r.headers['Content-Type']
             return tileBytes
     def getBaseUrl(self, mapname):
         if mapname in self.nameToUrl:
-            return self
+            return self.nameToUrl['mapname']
     @cherrypy.expose
     def index(self, mapname, zoom, xtile, ytile):
         print(f"tilecache: {mapname}")
@@ -74,8 +91,12 @@ class TileCache(object):
             filename = f"{f.absolute()}"
             mime = magic.from_file(filename, mime=True)
             return static.serve_file(filename, mime)
+        elif mapname in self.nameToUrl:
+            baseurl = self.nameToUrl[mapname]
+            print(f"load from urlmap: {baseurl}")
+            return self.loadTile(baseurl, mapname, zoom, xtile, ytile)
         elif mapname == "USGSTopo":
-            baseurl= f'https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{zoom}/{xtile}/{ytile}'
+            baseurl= f'https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile'
             return self.loadTile(baseurl, mapname, zoom, xtile, ytile)
         else:
             return f"""
