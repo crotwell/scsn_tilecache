@@ -89,6 +89,8 @@ class TileCache(object):
     @cherrypy.expose
     def index(self, mapname, zoom, ytile, xtile):
         print(f"tilecache: {mapname}")
+        if not (zoom.isdigit() and ytile.isdigit() and xtile.isdigit()):
+            raise Exception(f"Unknown params zoom:{zoom}  y:{ytile}  x:{xtile}")
         f = pathlib.Path(f"{self.cachedir}/{mapname}/{zoom}/{ytile}/{xtile}")
         if f.exists():
             print(f"serve existing file: {f}")
