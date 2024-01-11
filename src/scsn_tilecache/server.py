@@ -39,13 +39,16 @@ def main():
     args = do_parseargs()
     ringconf = tomllib.load(args.conf)
     args.conf.close()
+    port = ringconf['tilecache'].get('port', 9090)
 
-    cherrypy.config.update({'server.socket_port': 9090})
+    cherrypy.config.update({'server.socket_port': port})
     cherrypy.config.update({'server.socket_host': "0.0.0.0"})
     cherrypy.tree.mount(TileCacheWebService(ringconf),
                         '/tilecache'
                         )
-
+    print()
+    print(f"  http://localhost:{port}/tilecache/")
+    print()
     if args.daemon:
         d = Daemonizer(cherrypy.engine)
         d.subscribe()

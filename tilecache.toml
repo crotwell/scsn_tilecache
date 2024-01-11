@@ -1,6 +1,7 @@
 
 [tilecache]
 cachedir='./tilecache'
+port=9090
 
 [tilecache.nameToUrl]
 USGSTopo = 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile'
