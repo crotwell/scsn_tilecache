@@ -8,5 +8,6 @@ USGSTopo = 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapSer
 WorldGrey = 'https://services.arcgisonline.com/arcgis/rest/services//Canvas/World_Light_Gray_Base/MapServer/tile'
 WorldTopo = 'https://services.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer/tile'
 USGS_USImageryTopo = 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer/tile'
+USGSImageryOnly = 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/'
 WorldOceanBase = 'https://services.arcgisonline.com/arcgis/rest/services/Ocean/World_Ocean_Base/MapServer/tile'
 NatGeo = 'https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile'
