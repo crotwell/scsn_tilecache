@@ -69,7 +69,11 @@ class TileCache(object):
         self.nameToUrl = nameToUrl
     def loadTile(self, baseUrl, mapname, zoom, ytile, xtile):
         print(f"### Load Remote: {mapname} {zoom}/{ytile}/{xtile}")
-        r = requests.get(f'{baseUrl}/{zoom}/{ytile}/{xtile}')
+        if '{z}' in baseUrl and '{y}' in baseUrl and '{x}' in baseUrl:
+            reqUrl = baseUrl.replace('{z}', zoom).replace('{y}', ytile).replace('{x}', xtile)
+        else:
+            reqUrl = f'{baseUrl}/{zoom}/{ytile}/{xtile}'
+        r = requests.get(reqUrl)
         print(f"   {r.url}")
         f = pathlib.Path(f"./{self.cachedir}/{mapname}/{zoom}/{ytile}/{xtile}")
         if r.status_code == requests.codes.ok:
@@ -92,6 +96,7 @@ class TileCache(object):
         if not (zoom.isdigit() and ytile.isdigit() and xtile.isdigit()):
             raise Exception(f"Unknown params zoom:{zoom}  y:{ytile}  x:{xtile}")
         f = pathlib.Path(f"{self.cachedir}/{mapname}/{zoom}/{ytile}/{xtile}")
+        cherrypy.response.headers["Cache-Control"] = "max-age=86400"
         if f.exists():
             print(f"serve existing file: {f}")
             filename = f"{f.absolute()}"
@@ -102,6 +107,7 @@ class TileCache(object):
             print(f"load from urlmap: {baseurl}")
             return self.loadTile(baseurl, mapname, zoom, ytile, xtile)
         else:
+            cherrypy.response.headers["Cache-Control"] = "max-age=0"
             return f"""
     <html>
     <body>
