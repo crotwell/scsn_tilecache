@@ -14,4 +14,4 @@ NatGeo = 'https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/
 faults = 'https://earthquake.usgs.gov/basemap/tiles/faults/{z}/{x}/{y}.png'
 plates = 'https://earthquake.usgs.gov/basemap/tiles/plates/{z}/{x}/{y}.png'
 ushaz = 'https://earthquake.usgs.gov/basemap/tiles/ushaz/{z}/{x}/{y}.png'
-usgscatalog = 'https://earthquake.usgs.gov/arcgis/rest/services/eq/catalog/MapServer/tile/{z}/{x}/{y}'
+usgscatalog = 'https://earthquake.usgs.gov/arcgis/rest/services/eq/catalog/MapServer/tile/{z}/{y}/{x}'
