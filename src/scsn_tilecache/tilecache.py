@@ -65,8 +65,10 @@ class TileCacheWebService(object):
 
 class TileCache(object):
     def __init__(self, cachedir, nameToUrl):
-        self.cachedir = cachedir
+        self.cachedir = pathlib.Path(cachedir)
+        self.cachedir.mkdir(parents=True, exist_ok=True)
         self.nameToUrl = nameToUrl
+        print(f"Init cachedir: {self.cachedir}")
     def loadTile(self, baseUrl, mapname, zoom, ytile, xtile):
         print(f"### Load Remote: {mapname} {zoom}/{ytile}/{xtile}")
         if '{z}' in baseUrl and '{y}' in baseUrl and '{x}' in baseUrl:
@@ -75,7 +77,7 @@ class TileCache(object):
             reqUrl = f'{baseUrl}/{zoom}/{ytile}/{xtile}'
         r = requests.get(reqUrl)
         print(f"   {r.url}")
-        f = pathlib.Path(f"./{self.cachedir}/{mapname}/{zoom}/{ytile}/{xtile}")
+        f = pathlib.Path(self.cachedir, f"{mapname}/{zoom}/{ytile}/{xtile}")
         if r.status_code == requests.codes.ok:
             f.parent.mkdir(parents=True, exist_ok=True)
             tileBytes = r.content
