@@ -17,7 +17,7 @@ except ModuleNotFoundError:
 
 def do_parseargs():
     parser = argparse.ArgumentParser(
-        description="Find gaps in miniseed archive and attempt to recover missing data."
+        description="Dead simple tile cache."
     )
     parser.add_argument(
         "-v", "--verbose", help="increase output verbosity", action="store_true"
