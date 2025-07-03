@@ -79,9 +79,9 @@ class TileCache(object):
         if r.status_code == requests.codes.ok:
             f.parent.mkdir(parents=True, exist_ok=True)
             tileBytes = r.content
-            print(f"bytes in tile: {len(tileBytes)} from {r.url}")
             with open(f, "wb") as cachefile:
                 cachefile.write(tileBytes)
+            print(f"wrote {len(tileBytes)} bytes to {f}")
             cherrypy.response.headers['Content-Type'] = r.headers['Content-Type']
             return tileBytes
         else:
