@@ -97,7 +97,7 @@ class TileCache(object):
         print(f"tilecache: {mapname}")
         if not (zoom.isdigit() and ytile.isdigit() and xtile.isdigit()):
             raise Exception(f"Unknown params zoom:{zoom}  y:{ytile}  x:{xtile}")
-        f = pathlib.Path(f"{self.cachedir}/{mapname}/{zoom}/{ytile}/{xtile}")
+        f = pathlib.Path(self.cachedir, f"{mapname}/{zoom}/{ytile}/{xtile}")
         cherrypy.response.headers["Cache-Control"] = "max-age=86400"
         if f.exists():
             print(f"serve existing file: {f}")
