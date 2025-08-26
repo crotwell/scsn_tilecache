@@ -95,13 +95,14 @@ class TileCache(object):
     @cherrypy.expose
     def index(self, mapname, zoom, ytile, xtile):
         print(f"tilecache: {mapname}")
+        extension = ""
+        if xtile.endswith(".png"):
+            extension = ".png"
+            xtile = xtile[:-4]
         if not (zoom.isdigit() and ytile.isdigit() and xtile.isdigit()):
             raise Exception(f"Unknown params zoom:{zoom}  y:{ytile}  x:{xtile}")
-        f = pathlib.Path(self.cachedir, f"{mapname}/{zoom}/{ytile}/{xtile}")
+        f = pathlib.Path(self.cachedir, f"{mapname}/{zoom}/{ytile}/{xtile}{extension}")
         cherrypy.response.headers["Cache-Control"] = "max-age=86400"
-        if not f.exists():
-            # try with .png added
-            f = pathlib.Path(self.cachedir, f"{mapname}/{zoom}/{ytile}/{xtile}.png")
         if f.exists():
             print(f"serve existing file: {f}")
             filename = f"{f.absolute()}"
