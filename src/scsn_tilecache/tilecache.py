@@ -117,6 +117,8 @@ class TileCache(object):
             if len(baseurl) > 0:
                 print(f"load from urlmap: {baseurl}")
                 return self.loadTile(baseurl, mapname, zoom, ytile, xtile)
+
+        print(f"unloadable and non-existing file: {f}")
         cherrypy.response.headers["Cache-Control"] = "max-age=0"
         return f"""
     <html>
