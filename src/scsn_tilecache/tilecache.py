@@ -99,6 +99,9 @@ class TileCache(object):
             raise Exception(f"Unknown params zoom:{zoom}  y:{ytile}  x:{xtile}")
         f = pathlib.Path(self.cachedir, f"{mapname}/{zoom}/{ytile}/{xtile}")
         cherrypy.response.headers["Cache-Control"] = "max-age=86400"
+        if not f.exists():
+            # try with .png added
+            f = pathlib.Path(self.cachedir, f"{mapname}/{zoom}/{ytile}/{xtile}.png")
         if f.exists():
             print(f"serve existing file: {f}")
             filename = f"{f.absolute()}"
