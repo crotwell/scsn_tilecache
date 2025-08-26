@@ -43,7 +43,11 @@ class TileCacheWebService(object):
         <ul>
         """
         for mapname, baseurl in self.conf['tilecache']['nameToUrl'].items():
-            html += f"<li><a href=\"{mapname}\">{mapname}</a> <a href=\"{baseurl}\">{baseurl}</a></li>\n"
+            if len(baseurl)>0:
+                html += f"<li><a href=\"{mapname}\">{mapname}</a> <a href=\"{baseurl}\">{baseurl}</a></li>\n"
+            else:
+                html += f"<li><a href=\"{mapname}\">{mapname}</a></li>\n"
+
         html += "</ul></body></html>"
         return html
 
@@ -110,14 +114,14 @@ class TileCache(object):
             return static.serve_file(filename, mime)
         elif mapname in self.nameToUrl:
             baseurl = self.nameToUrl[mapname]
-            print(f"load from urlmap: {baseurl}")
-            return self.loadTile(baseurl, mapname, zoom, ytile, xtile)
-        else:
-            cherrypy.response.headers["Cache-Control"] = "max-age=0"
-            return f"""
+            if len(baseurl) > 0:
+                print(f"load from urlmap: {baseurl}")
+                return self.loadTile(baseurl, mapname, zoom, ytile, xtile)
+        cherrypy.response.headers["Cache-Control"] = "max-age=0"
+        return f"""
     <html>
     <body>
-    <p>Need to get {mapname}/{zoom}/{ytile}/{xtile}</p>
+    <p>Need to get {mapname}/{zoom}/{ytile}/{xtile}{extension}</p>
     <p>but unknown map name: {mapname}</p>
     </body>
     </html>
